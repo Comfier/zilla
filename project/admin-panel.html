@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - All Client Orders</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/orders.css">
+    <link rel="stylesheet" href="css/admin-panel.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Admin Panel - Furniture Orders</h2>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="admin-panel.html" class="nav-link active">All Orders</a>
+                <a href="admin-furniture.html" class="nav-link">Manage Furniture</a>
+                <a href="#" id="adminLogoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="adminUserInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1>All Client Orders</h1>
+                <p>View and manage all orders placed by clients</p>
+            </div>
+        </div>
+
+        <div class="admin-stats">
+            <div class="stat-card">
+                <h3 id="adminTotalOrders">0</h3>
+                <p>Total Orders</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="adminPendingOrders">0</h3>
+                <p>Pending</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="adminInProgressOrders">0</h3>
+                <p>In Progress</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="adminCompletedOrders">0</h3>
+                <p>Completed</p>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="adminFilterClient">Filter by Client Name:</label>
+                <input type="text" id="adminFilterClient" placeholder="Search client name...">
+            </div>
+            <div class="filter-group">
+                <label for="adminFilterStatus">Filter by Status:</label>
+                <select id="adminFilterStatus">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" id="clearAdminFilters">Clear Filters</button>
+        </div>
+
+        <div id="adminAllOrdersList" class="orders-grid">
+            <p class="loading">Loading all orders...</p>
+        </div>
+    </div>
+
+    <!-- Edit Order Modal for Admin -->
+    <div id="adminOrderModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Update Order Status</h2>
+            <form id="adminOrderForm">
+                <input type="hidden" id="adminOrderId">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" id="adminOrderClientName" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Client Email</label>
+                    <input type="email" id="adminOrderClientEmail" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Design</label>
+                    <textarea id="adminOrderDesign" rows="3" readonly></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Measurements</label>
+                    <textarea id="adminOrderMeasurements" rows="2" readonly></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="adminOrderStatus">Status *</label>
+                    <select id="adminOrderStatus" required>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adminOrderDueDate">Due Date</label>
+                    <input type="date" id="adminOrderDueDate">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                    <button type="button" class="btn btn-secondary" id="cancelAdminOrder">Cancel</button>
+                </div>
+                <div id="adminOrderError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/admin-panel.js"></script>
+</body>
+</html>
+
+
+
+

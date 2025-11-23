@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Custom Order - Client Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/orders.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Place Custom Order</h2>
+            <div class="nav-menu">
+                <a href="client-dashboard.html" class="nav-link">Dashboard</a>
+                <a href="client-catalog.html" class="nav-link">Browse Furniture</a>
+                <a href="client-orders.html" class="nav-link">My Orders</a>
+                <a href="#" id="clientLogoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="clientUserInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="orders-container">
+        <div class="orders-header">
+            <h1>Place a Custom Order</h1>
+            <a href="client-catalog.html" class="btn btn-secondary">Browse Catalog Instead</a>
+        </div>
+
+        <div class="order-form-container">
+            <form id="customOrderForm" class="auth-form" style="max-width: 800px; margin: 0 auto;">
+                <h2>Order Details</h2>
+                
+                <div class="form-group">
+                    <label for="customOrderClientName">Your Name *</label>
+                    <input type="text" id="customOrderClientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="customOrderClientEmail">Your Email *</label>
+                    <input type="email" id="customOrderClientEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="customOrderClientPhone">Your Phone</label>
+                    <input type="tel" id="customOrderClientPhone">
+                </div>
+                <div class="form-group">
+                    <label for="customOrderDesign">Design Description *</label>
+                    <textarea id="customOrderDesign" rows="4" required placeholder="Describe the furniture you want (e.g., Modern sofa, Dining table, etc.)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="customOrderMeasurements">Measurements *</label>
+                    <textarea id="customOrderMeasurements" rows="3" required placeholder="Enter measurements (e.g., Length: 200cm, Width: 100cm, Height: 80cm)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="customOrderInstructions">Special Instructions</label>
+                    <textarea id="customOrderInstructions" rows="4" placeholder="Any special instructions, preferences, or requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="customOrderDueDate">Preferred Due Date</label>
+                    <input type="date" id="customOrderDueDate">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Place Order</button>
+                    <a href="client-dashboard.html" class="btn btn-secondary">Cancel</a>
+                </div>
+                <div id="customOrderError" class="error-message"></div>
+                <div id="customOrderSuccess" class="success-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/place-order.js"></script>
+</body>
+</html>
+
+
+
+

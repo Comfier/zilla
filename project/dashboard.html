@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Furniture Order Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Furniture Order Management - Admin Panel</h2>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="admin-panel.html" class="nav-link">All Orders</a>
+                <a href="admin-furniture.html" class="nav-link">Manage Furniture</a>
+                <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="userInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Welcome back! Here's an overview of all orders and system statistics.</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions for Admin -->
+        <div class="quick-actions-section" id="adminQuickActions" style="display: none;">
+            <h2 style="color: white; margin-bottom: 20px; font-size: 24px;">Quick Actions</h2>
+            <div class="quick-actions-grid">
+                <a href="admin-panel.html" class="quick-action-card">
+                    <div class="quick-action-icon">📋</div>
+                    <h3>View All Orders</h3>
+                    <p>Manage and track all client orders</p>
+                </a>
+                <a href="admin-furniture.html" class="quick-action-card">
+                    <div class="quick-action-icon">🛋️</div>
+                    <h3>Manage Furniture</h3>
+                    <p>Add, edit, or remove furniture items</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h3 id="totalOrders">0</h3>
+                    <p>Total Orders</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-content">
+                    <h3 id="pendingOrders">0</h3>
+                    <p>Pending Orders</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3 id="completedOrders">0</h3>
+                    <p>Completed Orders</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔄</div>
+                <div class="stat-content">
+                    <h3 id="inProgressOrders">0</h3>
+                    <p>In Progress</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-orders-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Recent Orders</h2>
+                <a href="admin-panel.html" class="btn btn-primary" style="width: auto; padding: 10px 20px; text-decoration: none; display: inline-block;">View All Orders →</a>
+            </div>
+            <div id="recentOrdersList" class="orders-list">
+                <p class="loading">Loading recent orders...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
+

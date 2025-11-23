@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Order - Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Edit Order</h2>
+            <div class="nav-menu">
+                <a href="admin-panel.html" class="nav-link">← Back to Orders</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="#" id="adminLogoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="adminUserInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="min-height: auto; padding: 40px 20px;">
+        <div class="login-card" style="max-width: 800px;">
+            <div class="logo-section">
+                <h1>Update Order Status</h1>
+                <p>Update order status and details</p>
+            </div>
+            <form id="adminOrderForm" class="auth-form">
+                <input type="hidden" id="adminOrderId">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" id="adminOrderClientName" readonly style="background: #f5f5f5;">
+                </div>
+                <div class="form-group">
+                    <label>Client Email</label>
+                    <input type="email" id="adminOrderClientEmail" readonly style="background: #f5f5f5;">
+                </div>
+                <div class="form-group">
+                    <label>Design</label>
+                    <textarea id="adminOrderDesign" rows="3" readonly style="background: #f5f5f5;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Measurements</label>
+                    <textarea id="adminOrderMeasurements" rows="2" readonly style="background: #f5f5f5;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="adminOrderStatus">Status *</label>
+                    <select id="adminOrderStatus" required>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adminOrderDueDate">Due Date</label>
+                    <input type="date" id="adminOrderDueDate">
+                </div>
+                <div class="form-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Update Status</button>
+                    <a href="admin-panel.html" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancel</a>
+                </div>
+                <div id="adminOrderError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module">
+        import { authAPI, adminAPI } from './js/api.js';
+
+        // Check authentication
+        async function initEditPage() {
+            try {
+                const authResult = await authAPI.check();
+                if (!authResult.authenticated || authResult.user.role !== 'admin') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                const userInfo = document.getElementById('adminUserInfo');
+                if (userInfo) {
+                    userInfo.textContent = `Admin: ${authResult.user.email}`;
+                }
+
+                // Get order ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const orderId = urlParams.get('id');
+                
+                if (!orderId) {
+                    document.getElementById('adminOrderError').textContent = 'No order ID provided';
+                    document.getElementById('adminOrderError').classList.add('show');
+                    return;
+                }
+
+                await loadOrder(parseInt(orderId));
+            } catch (error) {
+                console.error('Init error:', error);
+                window.location.href = 'admin-panel.html';
+            }
+        }
+
+        // Load order data
+        async function loadOrder(id) {
+            try {
+                const orders = await adminAPI.getAllOrders();
+                const order = orders.find(o => parseInt(o.id) === id);
+
+                if (!order) {
+                    alert('Order not found');
+                    window.location.href = 'admin-panel.html';
+                    return;
+                }
+
+                document.getElementById('adminOrderId').value = order.id;
+                document.getElementById('adminOrderClientName').value = order.clientName || '';
+                document.getElementById('adminOrderClientEmail').value = order.clientEmail || '';
+                document.getElementById('adminOrderDesign').value = order.design || '';
+                document.getElementById('adminOrderMeasurements').value = order.measurements || '';
+                document.getElementById('adminOrderStatus').value = order.status || 'pending';
+                document.getElementById('adminOrderDueDate').value = order.dueDate ? order.dueDate.split('T')[0] : '';
+            } catch (error) {
+                console.error('Error loading order:', error);
+                alert('Error loading order. Please try again.');
+                window.location.href = 'admin-panel.html';
+            }
+        }
+
+        // Form submission
+        const adminOrderForm = document.getElementById('adminOrderForm');
+        if (adminOrderForm) {
+            adminOrderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errorDiv = document.getElementById('adminOrderError');
+                errorDiv.textContent = '';
+                errorDiv.classList.remove('show');
+
+                const submitBtn = adminOrderForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Updating...';
+
+                try {
+                    const orderData = {
+                        id: parseInt(document.getElementById('adminOrderId').value),
+                        status: document.getElementById('adminOrderStatus').value,
+                        dueDate: document.getElementById('adminOrderDueDate').value || null
+                    };
+
+                    await adminAPI.updateOrder(orderData);
+                    alert('Order updated successfully!');
+                    window.location.href = 'admin-panel.html';
+                } catch (error) {
+                    console.error('Error updating order:', error);
+                    errorDiv.textContent = error.message || 'Error updating order. Please try again.';
+                    errorDiv.classList.add('show');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+        }
+
+        // Logout
+        const logoutBtn = document.getElementById('adminLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await authAPI.logout();
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // Initialize page
+        initEditPage();
+    </script>
+</body>
+</html>
+

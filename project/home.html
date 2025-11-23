@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Furniture Orders - Browse Our Collection</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/catalog.css">
+    <style>
+        /* Ensure modal is visible */
+        #loginPromptModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        #loginPromptModal.show {
+            display: flex !important;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Furniture Orders</h2>
+            <div class="nav-menu">
+                <a href="home.html" class="nav-link active">Home</a>
+                <a href="client-login.html" class="nav-link">Client Login</a>
+                <a href="client-signup.html" class="nav-link">Sign Up</a>
+                <a href="admin-login.html" class="nav-link">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="catalog-container">
+        <div class="catalog-header">
+            <h1>Welcome to Furniture Orders</h1>
+            <p>Browse our collection of custom furniture. Create an account to place your order!</p>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="homeCategoryFilter">Filter by Category:</label>
+                <select id="homeCategoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="Living Room">Living Room</option>
+                    <option value="Bedroom">Bedroom</option>
+                    <option value="Dining Room">Dining Room</option>
+                    <option value="Office">Office</option>
+                    <option value="Storage">Storage</option>
+                    <option value="Kitchen">Kitchen</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" id="clearHomeFilters">Clear Filters</button>
+        </div>
+
+        <div id="homeFurnitureCatalog" class="catalog-grid">
+            <p class="loading">Loading furniture catalog...</p>
+        </div>
+    </div>
+
+    <!-- Login/Register Prompt Modal -->
+    <div id="loginPromptModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeOrderModal()" style="position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: #aaa;">&times;</span>
+            <h2 style="margin-top: 10px;">Create Account to Order</h2>
+            <p style="margin-bottom: 20px; color: #666;">
+                You need to create an account to place an order. It only takes a minute!
+            </p>
+            <div style="display: flex; gap: 10px; flex-direction: column;">
+                <a href="client-signup.html" id="modalSignupLink" class="btn btn-primary" style="text-align: center; text-decoration: none; display: block; padding: 12px;">Create Account</a>
+                <a href="client-login.html" id="modalLoginLink" class="btn btn-secondary" style="text-align: center; text-decoration: none; display: block; padding: 12px;">Already have an account? Login</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SIMPLE GLOBAL FUNCTIONS - Always Available -->
+    <script>
+        // Global variables
+        window.homepageUser = null;
+        
+        // Close modal
+        function closeOrderModal() {
+            const modal = document.getElementById('loginPromptModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // Show order modal - SIMPLE VERSION
+        function showOrderModal(furnitureId, furnitureName) {
+            console.log('BUTTON CLICKED! ID:', furnitureId, 'Name:', furnitureName);
+            
+            // Check if logged in
+            if (window.homepageUser) {
+                window.location.href = 'client-catalog.html?order=' + furnitureId;
+                return;
+            }
+            
+            // Get modal
+            const modal = document.getElementById('loginPromptModal');
+            if (!modal) {
+                alert('Error: Modal not found. Redirecting to signup...');
+                window.location.href = 'client-signup.html?order=' + furnitureId;
+                return;
+            }
+            
+            // Store ID
+            sessionStorage.setItem('pendingOrderId', furnitureId);
+            
+            // Update links
+            const signupLink = document.getElementById('modalSignupLink');
+            const loginLink = document.getElementById('modalLoginLink');
+            if (signupLink) signupLink.href = 'client-signup.html?order=' + furnitureId;
+            if (loginLink) loginLink.href = 'client-login.html?order=' + furnitureId;
+            
+            // Show modal - SIMPLE WAY
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            
+            console.log('Modal should be visible now');
+        }
+        
+        // Make it globally accessible
+        window.showOrderModal = showOrderModal;
+        window.closeOrderModal = closeOrderModal;
+        
+        // Close on outside click
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('loginPromptModal');
+            if (e.target === modal) {
+                closeOrderModal();
+            }
+        });
+    </script>
+    
+    <script type="module">
+        import { furnitureAPI, authAPI } from './js/api.js';
+
+        // Check if user is logged in
+        async function checkAuth() {
+            try {
+                const result = await authAPI.check();
+                if (result.authenticated) {
+                    window.homepageUser = result.user;
+                    console.log('User logged in:', result.user);
+                } else {
+                    window.homepageUser = null;
+                }
+            } catch (error) {
+                window.homepageUser = null;
+            }
+        }
+
+        // Load furniture catalog
+        async function loadFurniture(filters = {}) {
+            try {
+                const furniture = await furnitureAPI.getAll(filters);
+                displayFurniture(furniture);
+            } catch (error) {
+                console.error('Error loading furniture:', error);
+                document.getElementById('homeFurnitureCatalog').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛋️</div>
+                        <h3>Error Loading Catalog</h3>
+                        <p>${error.message || 'Please try refreshing the page.'}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display furniture
+        function displayFurniture(furniture) {
+            const catalog = document.getElementById('homeFurnitureCatalog');
+
+            if (!furniture || furniture.length === 0) {
+                catalog.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛋️</div>
+                        <h3>No furniture available</h3>
+                        <p>Check back later for new items!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            catalog.innerHTML = furniture.map(item => {
+                const itemId = item.id;
+                const itemName = item.name.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                // Escape for JavaScript string
+                const jsSafeName = item.name.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, ' ');
+                
+                return `
+                <div class="furniture-card">
+                    <div class="furniture-image">
+                        ${item.image_url && item.image_url.trim() !== '' ? 
+                            `<img src="${item.image_url}" alt="${itemName}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" onload="this.style.display='block';">
+                             <div class="no-image" style="display: none;">🛋️</div>` : 
+                            '<div class="no-image">🛋️</div>'}
+                    </div>
+                    <div class="furniture-content">
+                        <div class="furniture-category">${item.category}</div>
+                        <h3>${itemName}</h3>
+                        <p class="furniture-description">${item.description}</p>
+                        <div class="furniture-details">
+                            <p><strong>Measurements:</strong> ${item.default_measurements}</p>
+                            ${item.price_range ? `<p><strong>Price Range:</strong> ${item.price_range}</p>` : ''}
+                            ${item.features ? `<p><strong>Features:</strong> ${item.features}</p>` : ''}
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="showOrderModal(${itemId}, '${jsSafeName}')" style="cursor: pointer; width: 100%; margin-top: 15px;">
+                            ${window.homepageUser ? 'Order This Item' : 'Order Now - Sign Up Required'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+            
+            console.log('Furniture displayed:', furniture.length, 'items');
+        }
+
+        // Filter functionality
+        const categoryFilter = document.getElementById('homeCategoryFilter');
+        const clearFiltersBtn = document.getElementById('clearHomeFilters');
+
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', () => {
+                const filters = { category: categoryFilter.value === 'all' ? '' : categoryFilter.value };
+                loadFurniture(filters);
+            });
+        }
+
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                categoryFilter.value = 'all';
+                loadFurniture();
+            });
+        }
+
+        // Initialize
+        checkAuth().then(() => {
+            loadFurniture();
+        }).catch(error => {
+            console.error('Init error:', error);
+            loadFurniture();
+        });
+    </script>
+</body>
+</html>

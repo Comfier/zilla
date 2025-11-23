@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Registration - Furniture Orders</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo-section">
+                <h1>Furniture Orders</h1>
+                <p>Create Your Client Account</p>
+            </div>
+            <form id="clientSignupForm" class="auth-form">
+                <h2>Create Account</h2>
+                <div class="form-group">
+                    <label for="clientSignupName">Full Name *</label>
+                    <input type="text" id="clientSignupName" required placeholder="John Doe" autocomplete="name">
+                    <small class="form-hint">Enter your first and last name</small>
+                </div>
+                <div class="form-group">
+                    <label for="clientSignupEmail">Email Address *</label>
+                    <input type="email" id="clientSignupEmail" required placeholder="your.email@example.com" autocomplete="email">
+                    <small class="form-hint" id="emailHint">We'll never share your email</small>
+                </div>
+                <div class="form-group">
+                    <label for="clientSignupPhone">Phone Number <span style="color: #999; font-weight: normal; font-size: 12px;">(Optional)</span></label>
+                    <input type="tel" id="clientSignupPhone" placeholder="+1 234 567 8900" autocomplete="tel">
+                    <small class="form-hint">For order updates and notifications</small>
+                </div>
+                <div class="form-group">
+                    <label for="clientSignupPassword">Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="clientSignupPassword" required placeholder="Create a password" minlength="6" autocomplete="new-password">
+                        <span class="password-toggle" onclick="togglePassword('clientSignupPassword', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 18px; user-select: none;" title="Show/Hide Password">👁️</span>
+                    </div>
+                    <small class="form-hint" id="passwordHint">Minimum 6 characters required</small>
+                    <div id="passwordStrength" style="margin-top: 5px; font-size: 12px;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="clientSignupConfirmPassword">Confirm Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="clientSignupConfirmPassword" required placeholder="Re-enter your password" autocomplete="new-password">
+                        <span class="password-toggle" onclick="togglePassword('clientSignupConfirmPassword', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 18px; user-select: none;" title="Show/Hide Password">👁️</span>
+                    </div>
+                    <small class="form-hint" id="confirmPasswordHint">Passwords must match</small>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: start;">
+                        <input type="checkbox" id="agreeTerms" required style="margin-right: 8px; margin-top: 3px;">
+                        <span style="font-size: 13px;">I agree to the <a href="#" style="color: #667eea;">Terms of Service</a> and <a href="#" style="color: #667eea;">Privacy Policy</a></span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary" id="clientSignupBtn">
+                    <span id="clientSignupBtnText">Create Account</span>
+                    <span id="clientSignupBtnLoader" style="display: none;">⏳ Creating Account...</span>
+                </button>
+                <p class="form-footer">
+                    Already have an account? <a href="client-login.html">Login here</a>
+                </p>
+                <p class="form-footer" style="margin-top: 10px; font-size: 13px;">
+                    <a href="home.html">← Back to Homepage</a> | 
+                    <a href="admin-login.html" style="color: #999;">Admin Login</a>
+                </p>
+                <div id="clientSignupError" class="error-message"></div>
+                <div id="clientSignupSuccess" class="success-message"></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function togglePassword(inputId, toggle) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '👁️';
+            }
+        }
+
+        // Enhanced real-time validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('clientSignupName');
+            const emailInput = document.getElementById('clientSignupEmail');
+            const phoneInput = document.getElementById('clientSignupPhone');
+            const password = document.getElementById('clientSignupPassword');
+            const confirmPassword = document.getElementById('clientSignupConfirmPassword');
+            const submitBtn = document.getElementById('clientSignupBtn');
+            const errorDiv = document.getElementById('clientSignupError');
+            const agreeTerms = document.getElementById('agreeTerms');
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            // Phone validation (optional, but format if provided)
+            const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+
+            function checkPasswordStrength(pwd) {
+                let strength = 0;
+                const strengthDiv = document.getElementById('passwordStrength');
+                
+                if (pwd.length >= 6) strength++;
+                if (pwd.length >= 8) strength++;
+                if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++;
+                if (/\d/.test(pwd)) strength++;
+                if (/[^a-zA-Z\d]/.test(pwd)) strength++;
+                
+                if (pwd.length === 0) {
+                    strengthDiv.innerHTML = '';
+                    return;
+                }
+                
+                const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+                const colors = ['#dc3545', '#fd7e14', '#ffc107', '#20c997', '#28a745'];
+                
+                strengthDiv.innerHTML = `<span style="color: ${colors[strength - 1] || colors[0]}; font-weight: 600;">${labels[strength - 1] || labels[0]}</span>`;
+            }
+
+            function validateForm() {
+                const name = nameInput.value.trim();
+                const email = emailInput.value.trim();
+                const pwd = password.value;
+                const confirmPwd = confirmPassword.value;
+                const agreed = agreeTerms.checked;
+
+                let isValid = true;
+
+                // Name validation
+                if (name.length < 2) {
+                    isValid = false;
+                }
+
+                // Email validation
+                if (!emailRegex.test(email)) {
+                    isValid = false;
+                }
+
+                // Password validation
+                if (pwd.length < 6) {
+                    isValid = false;
+                }
+
+                // Confirm password
+                if (pwd !== confirmPwd || confirmPwd.length === 0) {
+                    isValid = false;
+                }
+
+                // Terms agreement
+                if (!agreed) {
+                    isValid = false;
+                }
+
+                submitBtn.disabled = !isValid;
+                return isValid;
+            }
+
+            // Name validation
+            nameInput.addEventListener('input', function() {
+                if (this.value.trim().length < 2 && this.value.length > 0) {
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    this.style.borderColor = '#e0e0e0';
+                }
+                validateForm();
+            });
+
+            // Email validation
+            emailInput.addEventListener('input', function() {
+                const email = this.value.trim();
+                const hint = document.getElementById('emailHint');
+                
+                if (email.length > 0 && !emailRegex.test(email)) {
+                    this.style.borderColor = '#dc3545';
+                    hint.textContent = 'Please enter a valid email address';
+                    hint.style.color = '#dc3545';
+                } else {
+                    this.style.borderColor = '#e0e0e0';
+                    hint.textContent = "We'll never share your email";
+                    hint.style.color = '#666';
+                }
+                validateForm();
+            });
+
+            // Phone validation (optional)
+            phoneInput.addEventListener('input', function() {
+                const phone = this.value.trim();
+                if (phone.length > 0 && !phoneRegex.test(phone)) {
+                    this.style.borderColor = '#ffc107';
+                } else {
+                    this.style.borderColor = '#e0e0e0';
+                }
+            });
+
+            // Password validation
+            password.addEventListener('input', function() {
+                const pwd = this.value;
+                checkPasswordStrength(pwd);
+                
+                if (pwd.length > 0 && pwd.length < 6) {
+                    this.style.borderColor = '#dc3545';
+                    document.getElementById('passwordHint').textContent = 'Password must be at least 6 characters';
+                    document.getElementById('passwordHint').style.color = '#dc3545';
+                } else {
+                    this.style.borderColor = '#e0e0e0';
+                    document.getElementById('passwordHint').textContent = 'Minimum 6 characters required';
+                    document.getElementById('passwordHint').style.color = '#666';
+                }
+                validateForm();
+            });
+
+            // Confirm password validation
+            confirmPassword.addEventListener('input', function() {
+                const pwd = password.value;
+                const confirmPwd = this.value;
+                const hint = document.getElementById('confirmPasswordHint');
+                
+                if (confirmPwd.length > 0) {
+                    if (pwd !== confirmPwd) {
+                        this.style.borderColor = '#dc3545';
+                        hint.textContent = 'Passwords do not match!';
+                        hint.style.color = '#dc3545';
+                        errorDiv.textContent = 'Passwords do not match!';
+                        errorDiv.classList.add('show');
+                    } else {
+                        this.style.borderColor = '#28a745';
+                        hint.textContent = '✓ Passwords match';
+                        hint.style.color = '#28a745';
+                        errorDiv.classList.remove('show');
+                    }
+                } else {
+                    this.style.borderColor = '#e0e0e0';
+                    hint.textContent = 'Passwords must match';
+                    hint.style.color = '#666';
+                }
+                validateForm();
+            });
+
+            // Terms checkbox
+            agreeTerms.addEventListener('change', validateForm);
+
+            // Initial validation
+            validateForm();
+        });
+    </script>
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/client-auth.js"></script>
+    <script type="module">
+        // Check for order parameter in URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order');
+            if (orderId) {
+                // Store in sessionStorage to use after signup
+                sessionStorage.setItem('pendingOrderId', orderId);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+

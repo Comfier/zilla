@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Furniture Catalog - Browse Available Furniture</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/catalog.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Furniture Catalog</h2>
+            <div class="nav-menu">
+                <a href="client-dashboard.html" class="nav-link">Dashboard</a>
+                <a href="client-catalog.html" class="nav-link active">Browse Furniture</a>
+                <a href="client-orders.html" class="nav-link">My Orders</a>
+                <a href="#" id="clientLogoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="clientUserInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="catalog-container">
+        <div class="catalog-header">
+            <h1>Browse Our Furniture Collection</h1>
+            <p>Select a furniture item to place an order with custom specifications</p>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="categoryFilter">Filter by Category:</label>
+                <select id="categoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="Living Room">Living Room</option>
+                    <option value="Bedroom">Bedroom</option>
+                    <option value="Dining Room">Dining Room</option>
+                    <option value="Office">Office</option>
+                    <option value="Storage">Storage</option>
+                    <option value="Kitchen">Kitchen</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" id="clearCatalogFilters">Clear Filters</button>
+        </div>
+
+        <div id="furnitureCatalog" class="catalog-grid">
+            <p class="loading">Loading furniture catalog...</p>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="orderFromCatalogModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Place Order: <span id="selectedFurnitureName"></span></h2>
+            <form id="orderFromCatalogForm">
+                <input type="hidden" id="selectedFurnitureId">
+                <div class="form-group">
+                    <label for="orderClientName">Your Name *</label>
+                    <input type="text" id="orderClientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="orderClientEmail">Your Email *</label>
+                    <input type="email" id="orderClientEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="orderClientPhone">Your Phone</label>
+                    <input type="tel" id="orderClientPhone">
+                </div>
+                <div class="form-group">
+                    <label for="orderDesign">Design Description *</label>
+                    <textarea id="orderDesign" rows="4" required placeholder="Describe any customizations or preferences..."></textarea>
+                    <small>Default: <span id="defaultDescription"></span></small>
+                </div>
+                <div class="form-group">
+                    <label for="orderMeasurements">Measurements *</label>
+                    <textarea id="orderMeasurements" rows="3" required placeholder="Enter your desired measurements..."></textarea>
+                    <small>Default: <span id="defaultMeasurements"></span></small>
+                </div>
+                <div class="form-group">
+                    <label for="orderInstructions">Special Instructions</label>
+                    <textarea id="orderInstructions" rows="4" placeholder="Any special instructions or preferences..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="orderDueDate">Preferred Due Date</label>
+                    <input type="date" id="orderDueDate">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Place Order</button>
+                    <button type="button" class="btn btn-secondary" id="cancelCatalogOrder">Cancel</button>
+                </div>
+                <div id="catalogOrderError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/client-catalog.js"></script>
+</body>
+</html>
+
+
+
+

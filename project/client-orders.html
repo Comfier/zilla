@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Client Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/orders.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">My Orders - Client Portal</h2>
+            <div class="nav-menu">
+                <a href="client-dashboard.html" class="nav-link">Dashboard</a>
+                <a href="client-catalog.html" class="nav-link">Browse Furniture</a>
+                <a href="client-orders.html" class="nav-link active">My Orders</a>
+                <a href="#" id="clientLogoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="clientUserInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="orders-container">
+        <div class="orders-header">
+            <h1>My Orders</h1>
+            <a href="place-order.html" class="btn btn-primary">+ Place New Order</a>
+        </div>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="clientFilterStatus">Filter by Status:</label>
+                <select id="clientFilterStatus">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" id="clearClientFilters">Clear Filters</button>
+        </div>
+
+        <div id="clientOrdersList" class="orders-grid">
+            <p class="loading">Loading your orders...</p>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/client-orders.js"></script>
+</body>
+</html>
+
+
+
+

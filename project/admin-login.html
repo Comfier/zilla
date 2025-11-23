@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Furniture Orders</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo-section">
+                <h1>Furniture Orders</h1>
+                <p>Admin Portal</p>
+            </div>
+            <form id="adminLoginForm" class="auth-form">
+                <h2>Admin Login</h2>
+                <div class="form-group">
+                    <label for="adminLoginEmail">Email Address</label>
+                    <input type="email" id="adminLoginEmail" required placeholder="admin@furniture.com" autocomplete="email">
+                    <small class="form-hint">Enter your admin email address</small>
+                </div>
+                <div class="form-group">
+                    <label for="adminLoginPassword">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="adminLoginPassword" required placeholder="Enter your password" autocomplete="current-password">
+                        <span class="password-toggle" onclick="togglePassword('adminLoginPassword', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 18px; user-select: none;" title="Show/Hide Password">👁️</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="adminLoginBtn">
+                    <span id="adminLoginBtnText">Login</span>
+                    <span id="adminLoginBtnLoader" style="display: none;">⏳ Logging in...</span>
+                </button>
+                <p class="form-footer">
+                    <a href="home.html">← Back to Homepage</a>
+                </p>
+                <p class="form-footer" style="margin-top: 10px; font-size: 13px;">
+                    <a href="client-login.html" style="color: #999;">Client Login</a>
+                </p>
+                <div id="adminLoginError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function togglePassword(inputId, toggle) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '👁️';
+            }
+        }
+    </script>
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module">
+        // Admin login uses same auth.js but redirects to admin dashboard
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        if (adminLoginForm) {
+            adminLoginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('adminLoginEmail').value.trim();
+                const password = document.getElementById('adminLoginPassword').value;
+                const errorDiv = document.getElementById('adminLoginError');
+                const loginBtn = document.getElementById('adminLoginBtn');
+                const btnText = document.getElementById('adminLoginBtnText');
+                const btnLoader = document.getElementById('adminLoginBtnLoader');
+
+                if (!email || !password) {
+                    errorDiv.textContent = 'Please fill in all required fields';
+                    errorDiv.classList.add('show');
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                btnText.style.display = 'none';
+                btnLoader.style.display = 'inline';
+                errorDiv.classList.remove('show');
+
+                try {
+                    const { authAPI } = await import('./js/api.js');
+                    const result = await authAPI.login(email, password);
+                    if (result.success) {
+                        if (result.user.role === 'admin') {
+                            // Redirect to admin dashboard
+                            window.location.href = 'admin-panel.html';
+                        } else {
+                            errorDiv.textContent = 'This is an admin login. Please use client login.';
+                            errorDiv.classList.add('show');
+                            loginBtn.disabled = false;
+                            btnText.style.display = 'inline';
+                            btnLoader.style.display = 'none';
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    errorDiv.textContent = error.message || 'Login failed. Please check your credentials.';
+                    errorDiv.classList.add('show');
+                } finally {
+                    loginBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    btnLoader.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+

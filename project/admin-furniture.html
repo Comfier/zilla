@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Furniture Catalog - Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/catalog.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Manage Furniture Catalog</h2>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="admin-panel.html" class="nav-link">All Orders</a>
+                <a href="admin-furniture.html" class="nav-link active">Manage Furniture</a>
+                <a href="#" id="adminLogoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="adminUserInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="catalog-container">
+        <div class="catalog-header">
+            <div>
+                <h1>Manage Furniture Catalog</h1>
+                <p>Add, edit, or remove furniture items from the catalog</p>
+            </div>
+            <button class="btn btn-primary" id="addFurnitureBtn">+ Add New</button>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="adminCategoryFilter">Filter by Category:</label>
+                <select id="adminCategoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="Living Room">Living Room</option>
+                    <option value="Bedroom">Bedroom</option>
+                    <option value="Dining Room">Dining Room</option>
+                    <option value="Office">Office</option>
+                    <option value="Storage">Storage</option>
+                    <option value="Kitchen">Kitchen</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" id="clearAdminCatalogFilters">Clear Filters</button>
+        </div>
+
+    <div id="adminFurnitureList" class="catalog-grid">
+        <p class="loading">Loading furniture catalog...</p>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content confirmation-modal">
+        <div class="confirmation-icon">⚠️</div>
+        <h2>Confirm Delete</h2>
+        <p id="deleteConfirmMessage">Are you sure you want to delete this item? This action cannot be undone.</p>
+        <div class="form-actions">
+            <button type="button" class="btn btn-delete" id="confirmDeleteBtn">🗑️ Yes, Delete</button>
+            <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="js/api.js"></script>
+<script type="module" src="js/admin-furniture.js"></script>
+</body>
+</html>
+
+
+
+

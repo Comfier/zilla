@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Order</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Add New Order</h2>
+            <div class="nav-menu">
+                <a href="orders.html" class="nav-link">← Back to Orders</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="userInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="min-height: auto; padding: 40px 20px;">
+        <div class="login-card" style="max-width: 800px;">
+            <div class="logo-section">
+                <h1>Add New Order</h1>
+                <p>Create a new furniture order</p>
+            </div>
+            <form id="orderForm" class="auth-form">
+                <div class="form-group">
+                    <label for="orderClientName">Client Name *</label>
+                    <input type="text" id="orderClientName" required placeholder="Enter client name">
+                </div>
+                <div class="form-group">
+                    <label for="orderClientEmail">Client Email *</label>
+                    <input type="email" id="orderClientEmail" required placeholder="client@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="orderClientPhone">Client Phone</label>
+                    <input type="tel" id="orderClientPhone" placeholder="+1 234 567 8900">
+                </div>
+                <div class="form-group">
+                    <label for="orderDesign">Design *</label>
+                    <textarea id="orderDesign" rows="4" required placeholder="Describe the furniture design..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="orderMeasurements">Measurements *</label>
+                    <textarea id="orderMeasurements" rows="3" required placeholder="e.g., Length: 200cm, Width: 90cm, Height: 85cm"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="orderInstructions">Instructions</label>
+                    <textarea id="orderInstructions" rows="3" placeholder="Any special instructions or requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="orderStatus">Status *</label>
+                    <select id="orderStatus" required>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="orderDueDate">Due Date</label>
+                    <input type="date" id="orderDueDate">
+                </div>
+                <div class="form-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Create Order</button>
+                    <a href="orders.html" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancel</a>
+                </div>
+                <div id="orderError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module">
+        import { authAPI, ordersAPI } from './js/api.js';
+
+        // Check authentication
+        async function initAddPage() {
+            try {
+                const authResult = await authAPI.check();
+                if (!authResult.authenticated) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                const userInfo = document.getElementById('userInfo');
+                if (userInfo) {
+                    userInfo.textContent = `Logged in as: ${authResult.user.email}`;
+                }
+            } catch (error) {
+                console.error('Init error:', error);
+                window.location.href = 'orders.html';
+            }
+        }
+
+        // Form submission
+        const orderForm = document.getElementById('orderForm');
+        if (orderForm) {
+            orderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errorDiv = document.getElementById('orderError');
+                errorDiv.textContent = '';
+                errorDiv.classList.remove('show');
+
+                const submitBtn = orderForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating...';
+
+                try {
+                    const orderData = {
+                        clientName: document.getElementById('orderClientName').value.trim(),
+                        clientEmail: document.getElementById('orderClientEmail').value.trim(),
+                        clientPhone: document.getElementById('orderClientPhone').value.trim() || '',
+                        design: document.getElementById('orderDesign').value.trim(),
+                        measurements: document.getElementById('orderMeasurements').value.trim(),
+                        instructions: document.getElementById('orderInstructions').value.trim() || '',
+                        status: document.getElementById('orderStatus').value,
+                        dueDate: document.getElementById('orderDueDate').value || null
+                    };
+
+                    // Validate required fields
+                    if (!orderData.clientName || !orderData.clientEmail || !orderData.design || !orderData.measurements) {
+                        errorDiv.textContent = 'Please fill in all required fields';
+                        errorDiv.classList.add('show');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return;
+                    }
+
+                    await ordersAPI.create(orderData);
+                    alert('Order created successfully!');
+                    window.location.href = 'orders.html';
+                } catch (error) {
+                    console.error('Error creating order:', error);
+                    errorDiv.textContent = error.message || 'Error creating order. Please try again.';
+                    errorDiv.classList.add('show');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+        }
+
+        // Logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await authAPI.logout();
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // Initialize page
+        initAddPage();
+    </script>
+</body>
+</html>
+

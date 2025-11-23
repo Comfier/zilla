@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Furniture - Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Edit Furniture</h2>
+            <div class="nav-menu">
+                <a href="admin-furniture.html" class="nav-link">← Back to Furniture</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="#" id="adminLogoutBtn" class="nav-link">Logout</a>
+                <span class="user-info" id="adminUserInfo"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="min-height: auto; padding: 40px 20px;">
+        <div class="login-card" style="max-width: 800px;">
+            <div class="logo-section">
+                <h1>Edit Furniture</h1>
+                <p id="pageSubtitle">Update furniture details</p>
+            </div>
+            <form id="furnitureForm" class="auth-form">
+                <input type="hidden" id="furnitureId">
+                <div class="form-group">
+                    <label for="furnitureName">Furniture Name *</label>
+                    <input type="text" id="furnitureName" required>
+                </div>
+                <div class="form-group">
+                    <label for="furnitureCategory">Category *</label>
+                    <select id="furnitureCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Living Room">Living Room</option>
+                        <option value="Bedroom">Bedroom</option>
+                        <option value="Dining Room">Dining Room</option>
+                        <option value="Office">Office</option>
+                        <option value="Storage">Storage</option>
+                        <option value="Kitchen">Kitchen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="furnitureDescription">Description *</label>
+                    <textarea id="furnitureDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="furnitureMeasurements">Default Measurements *</label>
+                    <textarea id="furnitureMeasurements" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="furniturePriceRange">Price Range</label>
+                    <input type="text" id="furniturePriceRange" placeholder="e.g., $500 - $1,000">
+                </div>
+                <div class="form-group">
+                    <label for="furnitureFeatures">Features</label>
+                    <textarea id="furnitureFeatures" rows="3" placeholder="List key features separated by commas"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="furnitureImage">Furniture Image</label>
+                    <div style="margin-bottom: 15px;">
+                        <input type="file" id="furnitureImage" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-secondary" id="selectImageBtn" style="width: auto; margin-bottom: 10px;">
+                            📷 Choose Image
+                        </button>
+                        <span id="imageFileName" style="margin-left: 10px; color: #666; font-size: 14px;"></span>
+                    </div>
+                    <div id="imagePreview" style="margin-bottom: 15px; display: none;">
+                        <img id="imagePreviewImg" src="" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <button type="button" id="removeImageBtn" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">Remove Image</button>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;">
+                        <label for="furnitureImageUrl" style="font-size: 13px; color: #666;">Or enter Image URL:</label>
+                        <input type="url" id="furnitureImageUrl" placeholder="https://example.com/image.jpg" style="margin-top: 5px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="furnitureIsActive" checked> Active (visible to clients)
+                    </label>
+                </div>
+                <div class="form-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+                    <a href="admin-furniture.html" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancel</a>
+                </div>
+                <div id="furnitureError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module">
+        import { authAPI, furnitureAPI } from './js/api.js';
+
+        let selectedImageFile = null;
+        let uploadedImageUrl = null;
+
+        // Check authentication
+        async function initEditPage() {
+            try {
+                const authResult = await authAPI.check();
+                if (!authResult.authenticated || authResult.user.role !== 'admin') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                const userInfo = document.getElementById('adminUserInfo');
+                if (userInfo) {
+                    userInfo.textContent = `Admin: ${authResult.user.email}`;
+                }
+
+                // Get furniture ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const furnitureId = urlParams.get('id');
+                
+                if (!furnitureId) {
+                    document.getElementById('furnitureError').textContent = 'No furniture ID provided';
+                    document.getElementById('furnitureError').classList.add('show');
+                    return;
+                }
+
+                await loadFurniture(parseInt(furnitureId));
+            } catch (error) {
+                console.error('Init error:', error);
+                window.location.href = 'admin-furniture.html';
+            }
+        }
+
+        // Load furniture data
+        async function loadFurniture(id) {
+            try {
+                const furniture = await furnitureAPI.getById(id);
+                
+                if (!furniture) {
+                    alert('Furniture not found');
+                    window.location.href = 'admin-furniture.html';
+                    return;
+                }
+
+                document.getElementById('furnitureId').value = furniture.id;
+                document.getElementById('furnitureName').value = furniture.name || '';
+                document.getElementById('furnitureCategory').value = furniture.category || '';
+                document.getElementById('furnitureDescription').value = furniture.description || '';
+                document.getElementById('furnitureMeasurements').value = furniture.default_measurements || '';
+                document.getElementById('furniturePriceRange').value = furniture.price_range || '';
+                document.getElementById('furnitureFeatures').value = furniture.features || '';
+                document.getElementById('furnitureImageUrl').value = furniture.image_url || '';
+                document.getElementById('furnitureIsActive').checked = furniture.is_active == 1 || furniture.is_active === true;
+
+                // Show existing image if available
+                if (furniture.image_url && furniture.image_url.trim() !== '') {
+                    const imagePreview = document.getElementById('imagePreview');
+                    const imagePreviewImg = document.getElementById('imagePreviewImg');
+                    if (imagePreviewImg) imagePreviewImg.src = furniture.image_url;
+                    if (imagePreview) imagePreview.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading furniture:', error);
+                alert('Error loading furniture. Please try again.');
+                window.location.href = 'admin-furniture.html';
+            }
+        }
+
+        // Image upload functionality
+        const imageInput = document.getElementById('furnitureImage');
+        const selectImageBtn = document.getElementById('selectImageBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewImg = document.getElementById('imagePreviewImg');
+        const imageFileName = document.getElementById('imageFileName');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const furnitureImageUrl = document.getElementById('furnitureImageUrl');
+
+        if (selectImageBtn && imageInput) {
+            selectImageBtn.addEventListener('click', () => {
+                imageInput.click();
+            });
+        }
+
+        if (imageInput) {
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedImageFile = file;
+                    imageFileName.textContent = file.name;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        imagePreviewImg.src = event.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    if (furnitureImageUrl) {
+                        furnitureImageUrl.value = '';
+                    }
+                }
+            });
+        }
+
+        if (removeImageBtn) {
+            removeImageBtn.addEventListener('click', () => {
+                selectedImageFile = null;
+                uploadedImageUrl = null;
+                if (imageInput) imageInput.value = '';
+                if (imagePreview) imagePreview.style.display = 'none';
+                if (imageFileName) imageFileName.textContent = '';
+                if (imagePreviewImg) imagePreviewImg.src = '';
+            });
+        }
+
+        // Upload image function
+        async function uploadImage(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('php/upload-image.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Upload failed');
+                }
+                
+                const result = await response.json();
+                return result.image_url;
+            } catch (error) {
+                console.error('Image upload error:', error);
+                throw error;
+            }
+        }
+
+        // Form submission
+        const furnitureForm = document.getElementById('furnitureForm');
+        if (furnitureForm) {
+            furnitureForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errorDiv = document.getElementById('furnitureError');
+                errorDiv.textContent = '';
+                errorDiv.classList.remove('show');
+
+                const name = document.getElementById('furnitureName').value.trim();
+                const category = document.getElementById('furnitureCategory').value;
+                const description = document.getElementById('furnitureDescription').value.trim();
+                const measurements = document.getElementById('furnitureMeasurements').value.trim();
+
+                if (!name || !category || !description || !measurements) {
+                    errorDiv.textContent = 'Please fill in all required fields';
+                    errorDiv.classList.add('show');
+                    return;
+                }
+
+                const submitBtn = furnitureForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+
+                try {
+                    let imageUrl = '';
+                    
+                    if (selectedImageFile) {
+                        try {
+                            imageUrl = await uploadImage(selectedImageFile);
+                            uploadedImageUrl = imageUrl;
+                        } catch (uploadError) {
+                            errorDiv.textContent = uploadError.message || 'Failed to upload image. Please try again.';
+                            errorDiv.classList.add('show');
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = originalText;
+                            return;
+                        }
+                    } else {
+                        const urlInput = document.getElementById('furnitureImageUrl');
+                        imageUrl = urlInput ? urlInput.value.trim() : '';
+                    }
+
+                    const furnitureData = {
+                        id: parseInt(document.getElementById('furnitureId').value),
+                        name: name,
+                        category: category,
+                        description: description,
+                        default_measurements: measurements,
+                        price_range: document.getElementById('furniturePriceRange').value.trim() || '',
+                        features: document.getElementById('furnitureFeatures').value.trim() || '',
+                        image_url: imageUrl,
+                        is_active: document.getElementById('furnitureIsActive').checked || true
+                    };
+
+                    await furnitureAPI.update(furnitureData);
+                    alert('Furniture updated successfully!');
+                    window.location.href = 'admin-furniture.html';
+                } catch (error) {
+                    console.error('Error saving furniture:', error);
+                    errorDiv.textContent = error.message || 'Error saving furniture. Please try again.';
+                    errorDiv.classList.add('show');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+        }
+
+        // Logout
+        const logoutBtn = document.getElementById('adminLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await authAPI.logout();
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // Initialize page
+        initEditPage();
+    </script>
+</body>
+</html>
+

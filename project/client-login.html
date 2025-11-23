@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Login - Furniture Orders</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo-section">
+                <h1>Furniture Orders</h1>
+                <p>Client Portal</p>
+            </div>
+            <form id="clientLoginForm" class="auth-form">
+                <h2>Client Login</h2>
+                <div class="form-group">
+                    <label for="clientLoginEmail">Email Address</label>
+                    <input type="email" id="clientLoginEmail" required placeholder="your.email@example.com" autocomplete="email">
+                    <small class="form-hint">Enter your registered email address</small>
+                </div>
+                <div class="form-group">
+                    <label for="clientLoginPassword">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="clientLoginPassword" required placeholder="Enter your password" autocomplete="current-password">
+                        <span class="password-toggle" onclick="togglePassword('clientLoginPassword', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 18px; user-select: none;" title="Show/Hide Password">👁️</span>
+                    </div>
+                </div>
+                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <label style="margin: 0; font-weight: normal; cursor: pointer;">
+                        <input type="checkbox" id="rememberMe" style="margin-right: 5px;"> Remember me
+                    </label>
+                    <a href="#" style="color: #667eea; text-decoration: none; font-size: 14px;">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary" id="clientLoginBtn">
+                    <span id="clientLoginBtnText">Login</span>
+                    <span id="clientLoginBtnLoader" style="display: none;">⏳ Logging in...</span>
+                </button>
+                <p class="form-footer">
+                    Don't have an account? <a href="client-signup.html">Create Account</a>
+                </p>
+                <p class="form-footer" style="margin-top: 10px; font-size: 13px;">
+                    <a href="home.html">← Back to Homepage</a> | 
+                    <a href="admin-login.html" style="color: #999;">Admin Login</a>
+                </p>
+                <div id="clientLoginError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function togglePassword(inputId, toggle) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                toggle.textContent = '👁️';
+            }
+        }
+    </script>
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/client-auth.js"></script>
+</body>
+</html>
+
+
+

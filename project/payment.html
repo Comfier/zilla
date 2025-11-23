@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment - Furniture Orders</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .payment-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .payment-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .payment-header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .order-summary h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #667eea;
+        }
+        .payment-form {
+            margin-top: 30px;
+        }
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .payment-method {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .payment-method:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .payment-method.selected {
+            border-color: #667eea;
+            background: #e8edff;
+        }
+        .payment-method input[type="radio"] {
+            margin-bottom: 10px;
+        }
+        .card-details {
+            display: none;
+            margin-top: 20px;
+        }
+        .card-details.show {
+            display: block;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+        .security-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #856404;
+        }
+        .payment-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .payment-actions .btn {
+            flex: 1;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+        }
+        .loading-overlay.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="nav-logo">Furniture Orders</h2>
+            <div class="nav-menu">
+                <a href="client-dashboard.html" class="nav-link">Dashboard</a>
+                <a href="client-orders.html" class="nav-link">My Orders</a>
+                <a href="#" id="clientLogoutBtn" class="nav-link">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>Complete Your Payment</h1>
+            <p>Order #<span id="orderIdDisplay"></span></p>
+        </div>
+
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="summary-row">
+                <span>Furniture Item:</span>
+                <span id="orderItemName">-</span>
+            </div>
+            <div class="summary-row">
+                <span>Design:</span>
+                <span id="orderDesign">-</span>
+            </div>
+            <div class="summary-row">
+                <span>Measurements:</span>
+                <span id="orderMeasurements">-</span>
+            </div>
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span id="orderSubtotal">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Total Amount:</span>
+                <span id="orderTotal">$0.00</span>
+            </div>
+        </div>
+
+        <form id="paymentForm" class="payment-form">
+            <h3>Select Payment Method</h3>
+            <div class="payment-methods">
+                <label class="payment-method">
+                    <input type="radio" name="paymentMethod" value="card" checked>
+                    <div>💳 Credit/Debit Card</div>
+                </label>
+                <label class="payment-method">
+                    <input type="radio" name="paymentMethod" value="bank">
+                    <div>🏦 Bank Transfer</div>
+                </label>
+                <label class="payment-method">
+                    <input type="radio" name="paymentMethod" value="cash">
+                    <div>💵 Cash on Delivery</div>
+                </label>
+            </div>
+
+            <div id="cardDetails" class="card-details show">
+                <div class="form-group">
+                    <label for="cardNumber">Card Number *</label>
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cardExpiry">Expiry Date *</label>
+                        <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardCVC">CVC *</label>
+                        <input type="text" id="cardCVC" placeholder="123" maxlength="4" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cardName">Cardholder Name *</label>
+                    <input type="text" id="cardName" placeholder="John Doe" required>
+                </div>
+            </div>
+
+            <div class="security-note">
+                <strong>🔒 Secure Payment:</strong> This is a demo system. No real payment will be processed. All transactions are simulated for testing purposes.
+            </div>
+
+            <div class="payment-actions">
+                <button type="submit" class="btn btn-primary" id="payButton">
+                    <span id="payButtonText">Pay Now</span>
+                    <span id="payButtonLoader" style="display: none;">Processing...</span>
+                </button>
+                <a href="client-orders.html" class="btn btn-secondary">Pay Later</a>
+            </div>
+
+            <div id="paymentError" class="error-message"></div>
+            <div id="paymentSuccess" class="success-message"></div>
+        </form>
+    </div>
+
+    <div class="loading-overlay" id="paymentLoading">
+        <div>
+            <div style="font-size: 2em; margin-bottom: 20px;">⏳</div>
+            <div>Processing your payment...</div>
+        </div>
+    </div>
+
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/payment.js"></script>
+</body>
+</html>
+
+
